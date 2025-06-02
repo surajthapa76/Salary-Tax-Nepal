@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Tax Calculator (Nepal)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-purple-100 to-pink-50 min-h-screen py-8">
+    <div class="max-w-3xl mx-auto px-4">
+        <h1 class="text-4xl font-bold text-center mb-8 text-blue-700 tracking-wide" style="font-family: 'Poppins', sans-serif;">Income Tax Calculator (Nepal)</h1>
+        <div class="bg-teal-100 rounded-lg p-4 mb-6 shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="w-full md:w-1/2">
+                    <label class="block text-sm font-medium mb-1 text-gray-700">Fiscal Year</label>
+                    <select class="rounded border-gray-300 px-2 py-1 w-full">
+                        <option>2081/2082</option>
+                        <option>2080/2081</option>
+                        <option>2079/2080</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <label class="block text-sm font-medium mb-1 text-gray-700">Nature of Employee</label>
+                    <select id="natureOfEmployee" class="rounded border-gray-300 px-2 py-1 w-full">
+                        <option value="unmarried">Unmarried</option>
+                        <option value="married">Married (Joint)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <form id="taxForm">
+            <div class="bg-teal-50 rounded-lg p-4 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 shadow-md">
+                <div>
+                    <h2 class="font-semibold text-lg mb-2 border-b border-teal-200 text-teal-700">Annual Income</h2>
+                    <div class="mb-2">
+                        <label class="block text-sm">Monthly Salary</label>
+                        <input type="number" id="monthlySalary" class="w-full rounded border-gray-300 px-2 py-1" min="0" step="100" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-sm">No. of Months</label>
+                        <input type="number" id="months" class="w-full rounded border-gray-300 px-2 py-1" min="1" max="12" value="12" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-sm">Bonus</label>
+                        <input type="number" id="bonus" class="w-full rounded border-gray-300 px-2 py-1" min="0" step="100">
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-sm font-semibold">Total Salary</label>
+                        <input type="number" id="totalSalary" class="w-full rounded border-gray-300 px-2 py-1 bg-gray-100" readonly value="0">
+                    </div>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-lg mb-2 border-b border-teal-200 text-teal-700">Annual Deduction</h2>
+                    <div class="mb-2">
+                        <label class="block text-sm">Social Security Fund</label>
+                        <input type="number" id="ssf" class="w-full rounded border-gray-300 px-2 py-1" min="0" value="0">
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-sm">Employees Provident Fund</label>
+                        <input type="number" id="epf" class="w-full rounded border-gray-300 px-2 py-1" min="0" value="0">
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-sm">Citizen Investment Trust</label>
+                        <input type="number" id="cit" class="w-full rounded border-gray-300 px-2 py-1" min="0" value="0">
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-sm">Insurance</label>
+                        <input type="number" id="insurance" class="w-full rounded border-gray-300 px-2 py-1" min="0" value="0">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-4">
+                <button type="submit" class="bg-blue-700 text-white px-8 py-2 rounded hover:bg-blue-800 text-lg font-semibold flex items-center justify-center">
+                    <i class="fas fa-calculator mr-2"></i>
+                    Calculate
+                </button>
+                <button type="button" id="resetBtn" class="bg-red-600 text-white font-bold px-4 py-2 rounded hover:bg-red-700">Reset</button>
+            </div>
+        </form>
+        <div id="resultContainer" class="mt-8 hidden">
+            <h3 class="text-xl font-semibold mb-4 text-teal-700">Tax Calculation Results</h3>
+            <div class="bg-white rounded-lg p-4 mb-6 shadow">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Net Assessable Income</p>
+                        <p class="text-lg font-semibold">Rs. <span id="netIncomeResult">0</span></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Total Tax</p>
+                        <p class="text-lg font-semibold">Rs. <span id="totalTaxResult">0</span></p>
+                    </div>
+                </div>
+            </div>
+            <h4 class="text-lg font-medium mb-3 text-teal-700">Tax Breakdown</h4>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-teal-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Band</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taxable Income</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tax</th>
+                        </tr>
+                    </thead>
+                    <tbody id="breakdownTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Auto-calculate total salary
+        function updateTotalSalary() {
+            const monthly = parseFloat(document.getElementById('monthlySalary').value) || 0;
+            const months = parseInt(document.getElementById('months').value) || 0;
+            const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+            document.getElementById('totalSalary').value = (monthly * months + bonus).toFixed(2);
+        }
+        document.getElementById('monthlySalary').addEventListener('input', updateTotalSalary);
+        document.getElementById('months').addEventListener('input', updateTotalSalary);
+        document.getElementById('bonus').addEventListener('input', updateTotalSalary);
+
+        // Reset button
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('taxForm').reset();
+            document.getElementById('months').value = 12;
+            document.getElementById('totalSalary').value = 0;
+            document.getElementById('resultContainer').classList.add('hidden');
+        });
+
+        // Tax calculation logic
+        function calculateNepalTax(income, married) {
+            let breakdown = [], tax = 0;
+            if (!married) {
+                // Unmarried slabs
+                const slabs = [
+                    { limit: 500000, rate: 0.01, label: 'Up to 500,000' },
+                    { limit: 700000, rate: 0.10, label: '500,001 – 700,000' },
+                    { limit: 1000000, rate: 0.20, label: '700,001 – 1,000,000' },
+                    { limit: 2000000, rate: 0.30, label: '1,000,001 – 2,000,000' },
+                    { limit: 5000000, rate: 0.36, label: '2,000,001 – 5,000,000' },
+                    { limit: Infinity, rate: 0.39, label: 'Above 5,000,000' }
+                ];
+                let prev = 0;
+                let remaining = income;
+                for (let i = 0; i < slabs.length && remaining > 0; i++) {
+                    const slab = slabs[i];
+                    const slabAmount = Math.min(slab.limit - prev, remaining);
+                    if (slabAmount > 0) {
+                        const slabTax = slabAmount * slab.rate;
+                        breakdown.push({ band: slab.label, amount: slabAmount, rate: slab.rate, tax: slabTax });
+                        tax += slabTax;
+                        remaining -= slabAmount;
+                        prev = slab.limit;
+                    }
+                }
+            } else {
+                // Married slabs
+                const slabs = [
+                    { limit: 600000, rate: 0.01, label: 'Up to 600,000' },
+                    { limit: 800000, rate: 0.10, label: '600,001 – 800,000' },
+                    { limit: 1100000, rate: 0.20, label: '800,001 – 1,100,000' },
+                    { limit: 2000000, rate: 0.30, label: '1,100,001 – 2,000,000' },
+                    { limit: 5000000, rate: 0.36, label: '2,000,001 – 5,000,000' },
+                    { limit: Infinity, rate: 0.39, label: 'Above 5,000,000' }
+                ];
+                let prev = 0;
+                let remaining = income;
+                for (let i = 0; i < slabs.length && remaining > 0; i++) {
+                    const slab = slabs[i];
+                    const slabAmount = Math.min(slab.limit - prev, remaining);
+                    if (slabAmount > 0) {
+                        const slabTax = slabAmount * slab.rate;
+                        breakdown.push({ band: slab.label, amount: slabAmount, rate: slab.rate, tax: slabTax });
+                        tax += slabTax;
+                        remaining -= slabAmount;
+                        prev = slab.limit;
+                    }
+                }
+            }
+            return {tax, breakdown};
+        }
+
+        document.getElementById('taxForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Gather values
+            const totalSalary = parseFloat(document.getElementById('totalSalary').value) || 0;
+            const ssf = parseFloat(document.getElementById('ssf').value) || 0;
+            const epf = parseFloat(document.getElementById('epf').value) || 0;
+            const cit = parseFloat(document.getElementById('cit').value) || 0;
+            const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+            const married = document.getElementById('natureOfEmployee').value === 'married';
+            // Net assessable income
+            const netIncome = totalSalary - (ssf + epf + cit + insurance);
+            // Calculate tax
+            const {tax, breakdown} = calculateNepalTax(netIncome, married);
+            // Show results
+            document.getElementById('netIncomeResult').textContent = netIncome.toLocaleString('en-IN');
+            document.getElementById('totalTaxResult').textContent = tax.toLocaleString('en-IN');
+            // Breakdown
+            const tbody = document.getElementById('breakdownTableBody');
+            tbody.innerHTML = '';
+            breakdown.forEach((b, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${b.band}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs. ${b.amount.toLocaleString('en-IN')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(b.rate * 100).toFixed(0)}%</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs. ${b.tax.toLocaleString('en-IN')}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            document.getElementById('resultContainer').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html> 
